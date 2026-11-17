@@ -90,3 +90,27 @@ npm run build
 ```bash
 npm test -- --watch=false
 ```
+
+---
+
+## ☁️ Despliegue en Railway (Paso a Paso)
+
+El proyecto ya cuenta con configuración lista para **Railway** (`Dockerfile`, `nginx.conf.template`, `railway.json` y `.dockerignore`):
+
+1. **Sube tus cambios a GitHub:**
+   ```bash
+   git add .
+   git commit -m "feat: plataforma experimental tesis 3d y configuracion railway"
+   git push origin main
+   ```
+
+2. **Conecta tu repositorio en Railway:**
+   * Entra a [railway.app](https://railway.app/) e inicia sesión.
+   * Haz clic en **«New Project»** ➔ **«Deploy from GitHub repo»**.
+   * Selecciona este repositorio (`catalogue-thesis`).
+   * Railway detectará automáticamente el archivo `railway.json` y `Dockerfile`.
+
+3. **¡Listo!:**
+   * Railway compilará la aplicación Angular con Node 20 y levantará un servidor Nginx ultraligero que responde automáticamente en el puerto dinámico `$PORT`.
+   * Ve a **Settings** ➔ **Networking** ➔ **«Generate Domain»** para obtener la URL pública con HTTPS gratis para tu sustentación (ejemplo: `https://catalogue-thesis-production.up.railway.app`).
+
