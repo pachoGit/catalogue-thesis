@@ -65,7 +65,7 @@ Diseñado específicamente para la **sustentación ante el jurado**, permitiendo
 ## 💻 Instrucciones de Ejecución
 
 ### Requisitos previos
-* Node.js 18+ (recomendado Node 20 o superior)
+* Node.js 26 (o superior)
 * npm 9+
 
 ### Instalación de dependencias
@@ -111,6 +111,6 @@ El proyecto ya cuenta con configuración lista para **Railway** (`Dockerfile`, `
    * Railway detectará automáticamente el archivo `railway.json` y `Dockerfile`.
 
 3. **¡Listo!:**
-   * Railway compilará la aplicación Angular con Node 20 y levantará un servidor Nginx ultraligero que responde automáticamente en el puerto dinámico `$PORT`.
+   * Railway compilará la aplicación Angular con Node 26 y levantará un servidor Nginx ultraligero que responde automáticamente en el puerto dinámico `$PORT`.
    * Ve a **Settings** ➔ **Networking** ➔ **«Generate Domain»** para obtener la URL pública con HTTPS gratis para tu sustentación (ejemplo: `https://catalogue-thesis-production.up.railway.app`).
 
