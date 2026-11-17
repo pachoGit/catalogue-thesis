@@ -1,0 +1,94 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Section Title -->
+  <div class="text-center max-w-3xl mx-auto mb-8">
+    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-50 text-violet-700 text-xs font-semibold border border-violet-200 mb-2">
+      ⚡ Modo Comparador Lado a Lado (Sustentación en Vivo)
+    </div>
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+      Comparación Simultánea: Catálogo 2D vs Catálogo 3D
+    </h1>
+    <p class="text-sm text-slate-600 mt-2">
+      Esta vista permite a los evaluadores y miembros del jurado apreciar de forma directa el diferencial de experiencia, control de perspectiva y percepción del producto.
+    </p>
+  </div>
+
+  <!-- Product Selector Tabs -->
+  <div class="flex items-center justify-center gap-3 mb-8 overflow-x-auto pb-2">
+    @for (prod of products(); track prod.id) {
+      <button
+        type="button"
+        (click)="selectProduct(prod)"
+        class="px-5 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
+        [ngClass]="selectedProduct()?.id === prod.id ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'"
+      >
+        <span>{{ prod.name }}</span>
+      </button>
+    }
+  </div>
+
+  @if (selectedProduct(); as p) {
+    <!-- Dual Comparison Split View -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      
+      <!-- Left Box: Catálogo 2D -->
+      <div class="bg-white rounded-3xl p-6 border-2 border-blue-200/80 shadow-md flex flex-col gap-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">2D</span>
+            <h3 class="font-bold text-slate-900 text-sm">Entorno Tradicional (Imágenes Estáticas)</h3>
+          </div>
+          <span class="text-xs text-slate-500 font-medium">Ángulos predefinidos</span>
+        </div>
+
+        <app-product-2d-gallery [product]="p" heightClass="h-80 sm:h-96"></app-product-2d-gallery>
+
+        <div class="rounded-xl bg-slate-50 p-3.5 text-xs text-slate-600 space-y-1 border border-slate-200">
+          <p class="font-semibold text-slate-800">Limitaciones habituales del 2D reportadas en la literatura:</p>
+          <ul class="list-disc pl-4 space-y-0.5">
+            <li>No permite evaluar ángulos ciegos o detalles no fotografiados.</li>
+            <li>Incertidumbre sobre volumen, curvatura y escala espacial.</li>
+            <li>Colores dependientes de la calibración de iluminación estática de la foto.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Right Box: Catálogo 3D -->
+      <div class="bg-white rounded-3xl p-6 border-2 border-indigo-300/80 shadow-md flex flex-col gap-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">3D</span>
+            <h3 class="font-bold text-slate-900 text-sm">Entorno Interactivo (Modelo WebGL 360°)</h3>
+          </div>
+          <span class="text-xs text-indigo-600 font-semibold">Interactividad libre</span>
+        </div>
+
+        <app-product-3d-canvas [product]="p" heightClass="h-80 sm:h-96"></app-product-3d-canvas>
+
+        <div class="rounded-xl bg-indigo-50/70 p-3.5 text-xs text-indigo-900 space-y-1 border border-indigo-100">
+          <p class="font-semibold text-indigo-950">Aportes clave del 3D validados empíricamente:</p>
+          <ul class="list-disc pl-4 space-y-0.5 text-indigo-800">
+            <li>Inspección activa y sensación háptica visual (Telepresencia).</li>
+            <li>Reducción significativa de la tasa de devolución proyectada.</li>
+            <li>Mayor permanencia e involucramiento cognitivo del consumidor.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Call to action for next step -->
+    <div class="mt-10 text-center">
+      <a
+        routerLink="/encuesta"
+        class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/30 transition-all"
+      >
+        <span>Continuar a la Encuesta de Tesis</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </a>
+    </div>
+  }
+
+</div>

@@ -1,0 +1,167 @@
+<div class="relative w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50 shadow-inner group" [ngClass]="heightClass">
+  
+  <!-- 3D Canvas Container Element -->
+  <div #canvasContainer class="w-full h-full cursor-grab active:cursor-grabbing select-none outline-none"></div>
+
+  <!-- Loading Overlay -->
+  @if (isLoading()) {
+    <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/90 backdrop-blur-sm z-30 transition-opacity">
+      <div class="relative w-16 h-16 mb-4">
+        <div class="absolute inset-0 border-4 border-indigo-200 rounded-full animate-ping opacity-25"></div>
+        <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      <p class="text-sm font-semibold text-slate-800">Cargando Entorno Tridimensional...</p>
+      <div class="w-48 bg-slate-200 rounded-full h-2 mt-3 overflow-hidden">
+        <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300" [style.width.%]="loadingProgress()"></div>
+      </div>
+      <span class="text-xs text-slate-500 mt-1 font-mono">{{ loadingProgress() }}% renderizado</span>
+    </div>
+  }
+
+  <!-- Floating Real-Time HUD Telemetry Pill (Top Left) -->
+  <div class="absolute top-3 left-3 flex items-center gap-2 z-20 pointer-events-none">
+    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white text-xs font-medium shadow-md border border-white/10">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span>3D WebGL</span>
+      <span class="text-slate-400">|</span>
+      <span>Rotaciones: <strong class="text-amber-300 font-mono">{{ totalRotations() }}</strong></span>
+      <span class="text-slate-400">|</span>
+      <span>Zoom: <strong class="text-cyan-300 font-mono">{{ currentZoomLevel() }}</strong></span>
+    </div>
+  </div>
+
+  <!-- Interactive Instruction Badge (Center on first load) -->
+  <div class="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 pointer-events-none transition-opacity duration-500 opacity-80 group-hover:opacity-40">
+    <div class="px-4 py-1.5 rounded-full bg-slate-900/70 backdrop-blur-md text-white text-xs font-light flex items-center gap-2 shadow-lg">
+      <svg class="w-4 h-4 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
+      </svg>
+      <span>Arrastra para rotar 360° • Rueda para zoom</span>
+    </div>
+  </div>
+
+  <!-- Color Variant Switcher Floating (Bottom Left) -->
+  @if (product.model3D.availableColors.length > 0) {
+    <div class="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 p-1.5 rounded-xl bg-white/90 backdrop-blur-md shadow-md border border-slate-200/90">
+      <span class="text-[10px] font-semibold text-slate-500 uppercase px-1 hidden sm:inline">Color 3D:</span>
+      @for (c of product.model3D.availableColors; track c.hex) {
+        <button
+          type="button"
+          (click)="changeColor(c.hex)"
+          [title]="c.name"
+          class="w-6 h-6 rounded-full border-2 transition-transform duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 shadow-sm"
+          [style.backgroundColor]="c.hex"
+          [ngClass]="currentColorHex() === c.hex ? 'border-indigo-600 scale-110 ring-2 ring-indigo-400' : 'border-white/80'"
+        ></button>
+      }
+    </div>
+  }
+
+  <!-- Interactive Controls Toolbar Floating (Top Right & Right Side) -->
+  <div class="absolute top-3 right-3 flex flex-col gap-1.5 z-20">
+    <!-- Auto-Rotate Button -->
+    <button
+      type="button"
+      (click)="toggleAutoRotate()"
+      [title]="isAutoRotating() ? 'Detener auto-rotación' : 'Activar auto-rotación 360°'"
+      class="w-9 h-9 flex items-center justify-center rounded-xl backdrop-blur-md shadow-sm border transition-all duration-200"
+      [ngClass]="isAutoRotating() ? 'bg-indigo-600 text-white border-indigo-700 shadow-indigo-200' : 'bg-white/90 text-slate-700 border-slate-200 hover:bg-white'"
+    >
+      <svg class="w-4 h-4" [ngClass]="{'animate-spin': isAutoRotating()}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+    </button>
+
+    <!-- Wireframe Mode Button (Shows 3D geometry structure) -->
+    <button
+      type="button"
+      (click)="toggleWireframe()"
+      title="Modo Malla Poligonal (Wireframe 3D)"
+      class="w-9 h-9 flex items-center justify-center rounded-xl backdrop-blur-md shadow-sm border transition-all duration-200"
+      [ngClass]="isWireframe() ? 'bg-purple-600 text-white border-purple-700' : 'bg-white/90 text-slate-700 border-slate-200 hover:bg-white'"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    </button>
+
+    <!-- Lighting Preset Selector -->
+    <div class="relative group/light">
+      <button
+        type="button"
+        title="Ambientes de Iluminación de Estudio"
+        class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/90 text-slate-700 border border-slate-200 backdrop-blur-md shadow-sm hover:bg-white transition-all"
+      >
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      </button>
+      <div class="hidden group-hover/light:flex flex-col gap-1 absolute right-11 top-0 bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-xl border border-slate-200 text-xs whitespace-nowrap min-w-32 z-30">
+        <button
+          type="button"
+          (click)="setLighting('studio')"
+          class="px-2 py-1.5 rounded-lg text-left transition-colors flex items-center gap-1.5"
+          [ngClass]="currentLighting() === 'studio' ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'hover:bg-slate-100 text-slate-700'"
+        >
+          <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+          Estudio Neutro
+        </button>
+        <button
+          type="button"
+          (click)="setLighting('warm')"
+          class="px-2 py-1.5 rounded-lg text-left transition-colors flex items-center gap-1.5"
+          [ngClass]="currentLighting() === 'warm' ? 'bg-amber-50 text-amber-800 font-semibold' : 'hover:bg-slate-100 text-slate-700'"
+        >
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          Luz Cálida
+        </button>
+        <button
+          type="button"
+          (click)="setLighting('cyber')"
+          class="px-2 py-1.5 rounded-lg text-left transition-colors flex items-center gap-1.5"
+          [ngClass]="currentLighting() === 'cyber' ? 'bg-purple-900 text-purple-200 font-semibold' : 'hover:bg-slate-100 text-slate-700'"
+        >
+          <span class="w-2 h-2 rounded-full bg-fuchsia-500"></span>
+          Neón Cyber
+        </button>
+      </div>
+    </div>
+
+    <!-- Zoom In -->
+    <button
+      type="button"
+      (click)="zoomIn()"
+      title="Acercar (Zoom +)"
+      class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/90 text-slate-700 border border-slate-200 backdrop-blur-md shadow-sm hover:bg-white transition-all"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+    </button>
+
+    <!-- Zoom Out -->
+    <button
+      type="button"
+      (click)="zoomOut()"
+      title="Alejar (Zoom -)"
+      class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/90 text-slate-700 border border-slate-200 backdrop-blur-md shadow-sm hover:bg-white transition-all"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
+      </svg>
+    </button>
+
+    <!-- Reset Camera Angle -->
+    <button
+      type="button"
+      (click)="resetCamera()"
+      title="Restablecer posición inicial de cámara"
+      class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/90 text-slate-700 border border-slate-200 backdrop-blur-md shadow-sm hover:bg-white transition-all"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+      </svg>
+    </button>
+  </div>
+
+</div>

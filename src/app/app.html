@@ -1,0 +1,15 @@
+<div class="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased selection:bg-indigo-500 selection:text-white">
+  <!-- Global Application Header -->
+  <app-header></app-header>
+
+  <!-- Guided Stepper Banner (Follows participant progress) -->
+  <app-banner-stepper></app-banner-stepper>
+
+  <!-- Main Routed Content Area -->
+  <main class="flex-1">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Academic Thesis Footer -->
+  <app-footer></app-footer>
+</div>
